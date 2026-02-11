@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
+        /* --- COLORES Y FUENTES --- */
         :root {
             --paper-color: #fdfbf7;
             --envelope-color: #d7bfa6;
@@ -33,7 +34,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- PANTALLA DE INICIO --- */
+        /* --- PANTALLA DE INICIO (Necesaria para activar audio) --- */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; color: white; z-index: 9999;
@@ -41,21 +42,14 @@
             justify-content: center; align-items: center; text-align: center;
         }
 
-        /* --- MINI REPRODUCTOR VISIBLE (PARA QUE NO BLOQUEEN) --- */
+        /* --- REPRODUCTOR OCULTO PERO PRESENTE --- */
         #video-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 120px; /* Pequeño pero visible */
-            height: 70px;
-            z-index: 10000; /* Encima de todo */
-            border: 2px solid white;
-            border-radius: 10px;
-            overflow: hidden;
-            opacity: 0.8;
+            position: fixed; bottom: 0; right: 0;
+            width: 1px; height: 1px; opacity: 0.01; 
+            pointer-events: none; z-index: -1;
         }
 
-        /* --- ESTILOS DE CARTA Y SOBRE --- */
+        /* --- SOBRE --- */
         .envelope-container { cursor: pointer; transition: transform 0.3s; }
         .envelope-container:hover { transform: scale(1.02); }
         .envelope { width: 300px; height: 200px; background-color: var(--envelope-dark); position: relative; border-radius: 5px; }
@@ -63,12 +57,17 @@
         .envelope.open .envelope-flap { transform: rotateX(180deg); z-index: 5; }
         .envelope-pocket { position: absolute; bottom: 0; left: 0; border-left: 150px solid var(--envelope-color); border-right: 150px solid var(--envelope-color); border-bottom: 100px solid var(--envelope-dark); border-top: 100px solid transparent; z-index: 15; border-radius: 0 0 5px 5px; }
         
-        .letter-paper { background-color: var(--paper-color); width: 90vw; max-width: 500px; min-height: 60vh; padding: 2rem; position: relative; transform: rotate(-1deg); border: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .seal { width: 40px; height: 40px; background-color: var(--love-red); border-radius: 50%; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 25; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid rgba(255,255,255,0.2); }
+        .envelope.open .seal { display: none; }
+
+        /* --- CARTA --- */
+        .letter-paper { background-color: var(--paper-color); width: 90vw; max-width: 500px; min-height: 60vh; padding: 2rem; position: relative; transform: rotate(-1deg); border: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; text-align: center; background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png"); }
         
         .btn-vintage { background-color: var(--love-red); color: white; border: none; padding: 10px 20px; font-family: 'Special Elite', monospace; cursor: pointer; margin-top: 20px; border-radius: 3px; box-shadow: 2px 2px 0px var(--text-color); }
         
-        /* Loading Text */
-        #loading-text { font-size: 0.8rem; color: #aaa; margin-top: 10px; }
+        /* Corazones */
+        .heart-particle { position: fixed; color: var(--love-red); font-size: 20px; pointer-events: none; z-index: 100; animation: floatUp 4s ease-out forwards; }
+        @keyframes floatUp { to { transform: translateY(-100vh); opacity: 0; } }
 
     </style>
 </head>
@@ -80,22 +79,23 @@
 
     <div id="start-screen">
         <h1 class="text-3xl mb-4" style="font-family: 'Dancing Script', cursive;">Hola mi amor...</h1>
-        <p class="mb-8">Tengo una sorpresa para ti.<br>Por favor, sube el volumen.</p>
+        <p class="mb-4 text-sm text-gray-300">Espera a que cargue la sorpresa...</p>
         
         <button id="start-btn" class="hidden btn-vintage pulse" onclick="startExperience()">
             COMENZAR ❤️
         </button>
         
-        <p id="loading-text" class="animate-pulse">Cargando canción...</p>
+        <p id="loading-text" class="animate-pulse mt-4 text-xs">Cargando música...</p>
     </div>
 
-    <div id="main-content" class="hidden w-full flex justify-center">
+    <div id="main-content" class="hidden w-full h-full flex items-center justify-center">
         
         <div id="scene-envelope" class="flex flex-col items-center">
             <div class="envelope-container" onclick="openEnvelope()">
                 <div class="envelope" id="envelope">
                     <div class="envelope-flap"></div>
                     <div class="envelope-pocket"></div>
+                    <div class="seal">♥</div>
                     <div class="absolute bottom-4 w-full text-center z-20">
                         <span class="font-bold text-lg text-white drop-shadow-md" style="font-family: 'Dancing Script', cursive; font-size: 2rem;">Para mi pollo</span>
                     </div>
@@ -106,47 +106,70 @@
 
         <div id="scene-sky" class="hidden letter-paper fade-in">
             <h1 class="text-2xl mb-4 font-bold text-red-700">9 de Febrero, 2024</h1>
-            <div class="w-full h-48 bg-gray-200 mb-4 overflow-hidden flex items-center justify-center">
+            <div class="w-full h-48 bg-gray-200 mb-4 overflow-hidden flex items-center justify-center border-4 border-white shadow-md transform rotate-1">
                 <img src="cielo.png" alt="Cielo" class="object-cover w-full h-full" onerror="this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800'">
             </div>
-            <p class="text-sm mb-4">Ese día el cielo nos contó una historia...</p>
-            <button class="btn-vintage" onclick="nextScene('scene-sky', 'scene-proposal')">Siguiente &rarr;</button>
+            <p class="text-sm mb-4 leading-relaxed">Ese día el cielo nos contó una historia. Las estrellas conspiraron para nosotros.</p>
+            <button class="btn-vintage" onclick="nextScene('scene-sky', 'scene-counter')">Siguiente &rarr;</button>
+        </div>
+
+        <div id="scene-counter" class="hidden letter-paper fade-in">
+            <h1 class="text-xl mb-6 text-red-700 font-bold">Desde el 18 de Junio...</h1>
+            <div class="my-6 p-4 border-2 border-dashed border-red-300 w-full bg-white/50">
+                <div class="grid grid-cols-3 gap-2 text-center text-xl font-bold text-gray-700">
+                    <div><span id="days">0</span><br><span class="text-xs font-normal">Días</span></div>
+                    <div><span id="hours">0</span><br><span class="text-xs font-normal">Horas</span></div>
+                    <div><span id="minutes">0</span><br><span class="text-xs font-normal">Min</span></div>
+                </div>
+            </div>
+            <p class="text-sm italic mb-4">... han sido los mejores días de mi vida.</p>
+            <button class="btn-vintage" onclick="nextScene('scene-counter', 'scene-proposal')">Tengo una pregunta...</button>
         </div>
 
         <div id="scene-proposal" class="hidden letter-paper fade-in">
             <h1 class="text-2xl mt-8 mb-8 font-bold text-center">
-                ¿Quieres ser mi<br>
-                <span class="text-4xl text-red-600" style="font-family: 'Dancing Script'">Valentine's Day?</span>
+                Cristian,<br>¿Quieres ser mi<br>
+                <span class="text-4xl text-red-600 block mt-2" style="font-family: 'Dancing Script'">Valentine's Day?</span>
             </h1>
-            <div class="flex gap-4 mt-4 justify-center">
+            <div class="flex gap-4 mt-8 justify-center items-center">
                 <button id="btn-yes" class="btn-vintage pulse" onclick="acceptProposal()">¡SÍ! ♥</button>
+                <button id="btn-no" class="bg-gray-400 text-white px-4 py-2 rounded text-xs" onclick="handleNoClick()" onmouseover="handleNoClick()">No</button>
             </div>
         </div>
         
         <div id="scene-success" class="hidden letter-paper fade-in items-center justify-center text-center">
-            <h1 class="text-3xl font-bold text-red-600 mb-4">¡TE AMO!</h1>
-             <img src="pollitos.gif" alt="Amor" class="w-48 h-48 object-cover rounded-full mb-4">
+            <h1 class="text-3xl font-bold text-red-600 mb-4 animate-bounce">¡SABÍA QUE SÍ!</h1>
+             <div class="w-48 h-48 rounded-full border-4 border-red-200 overflow-hidden mb-6 shadow-lg">
+                <img src="pollitos.gif" alt="Pollitos" class="w-full h-full object-cover">
+             </div>
+            <p class="text-2xl font-bold text-red-800 handwritten">TE AMO MUCHOO</p>
         </div>
 
     </div>
 
     <script>
-        // --- YOUTUBE API ---
+        // --- CONFIGURACIÓN DE YOUTUBE ---
         var player;
+        
+        // 1. Inyectar API de YouTube
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+        // 2. Cuando la API esté lista, crear el reproductor
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
-                height: '100%',
-                width: '100%',
-                videoId: 't6jI4kXz5pc', // ID DE LA CANCIÓN
+                height: '1', 
+                width: '1',
+                // CAMBIAMOS EL ID A UN VIDEO DE LETRAS QUE NO TIENE BLOQUEO
+                videoId: 'Po7m41KqJcQ', 
                 playerVars: {
                     'playsinline': 1,
-                    'controls': 1, // Controles visibles por si acaso falla el auto
-                    'loop': 1
+                    'controls': 0,
+                    'loop': 1,
+                    // Playlist necesaria para que el loop funcione
+                    'playlist': 'Po7m41KqJcQ' 
                 },
                 events: {
                     'onReady': onPlayerReady,
@@ -155,40 +178,39 @@
             });
         }
 
-        // CUANDO LA MUSICA ESTA LISTA
+        // 3. Cuando el video carga correctamente
         function onPlayerReady(event) {
-            console.log("Música cargada");
+            console.log("Música lista");
             document.getElementById('loading-text').classList.add('hidden');
             document.getElementById('start-btn').classList.remove('hidden');
         }
 
-        // SI HAY ERROR (COPYRIGHT O ID MAL)
+        // 4. Si hay error (Por si acaso este video también fallara en el futuro)
         function onPlayerError(event) {
-            console.error("Error en YouTube:", event.data);
-            document.getElementById('loading-text').innerText = "Error cargando música :( Intenta recargar.";
-            document.getElementById('loading-text').style.color = "red";
+            console.error("Error música:", event.data);
+            // Intentamos con otro ID de respaldo si falla el primero
+            if(player) {
+                // Video alternativo: Ramones - Baby I Love You (Subtitulada)
+                player.loadVideoById("R795KiMD4gM");
+            }
         }
 
-        // AL DAR CLICK EN COMENZAR
+        // 5. CLICK EN "COMENZAR"
         function startExperience() {
-            // Intentar reproducir
             if (player) {
-                player.unMute(); // Quitar silencio importante para Chrome
+                player.unMute();
                 player.setVolume(100);
                 player.playVideo();
             }
 
-            // Ocultar inicio, mostrar contenido
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            
-            // Ocultar el video visualmente (opcional, si quieres que desaparezca de la esquina)
-            // document.getElementById('video-container').style.opacity = '0'; 
         }
 
-        // --- NAVEGACION ---
+        // --- LÓGICA DE LA CARTA ---
         function openEnvelope() {
             document.getElementById('envelope').classList.add('open');
+            createHearts();
             setTimeout(() => {
                 document.getElementById('scene-envelope').classList.add('hidden');
                 document.getElementById('scene-sky').classList.remove('hidden');
@@ -198,12 +220,47 @@
         function nextScene(curr, next) {
             document.getElementById(curr).classList.add('hidden');
             document.getElementById(next).classList.remove('hidden');
+            if(next === 'scene-counter') startCounter();
+        }
+
+        function startCounter() {
+            const startDate = new Date('2024-06-18T00:00:00');
+            function update() {
+                const now = new Date();
+                const diff = now - startDate;
+                document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+                document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById('minutes').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            }
+            update(); setInterval(update, 60000);
+        }
+
+        function createHearts() {
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '♥';
+                heart.classList.add('heart-particle');
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = '100vh';
+                heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }
+        }
+
+        let yesScale = 1;
+        function handleNoClick() {
+            yesScale += 0.3;
+            document.getElementById('btn-yes').style.transform = `scale(${yesScale})`;
+            const btnNo = document.getElementById('btn-no');
+            btnNo.style.opacity = parseFloat(window.getComputedStyle(btnNo).opacity) - 0.2;
+            if (btnNo.style.opacity < 0.2) btnNo.style.display = 'none';
         }
 
         function acceptProposal() {
+            createHearts();
             nextScene('scene-proposal', 'scene-success');
         }
-
     </script>
 </body>
 </html>
