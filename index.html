@@ -19,9 +19,9 @@
 
         body {
             background-color: #f0e6d2;
-            font-family: 'Special Elite', monospace; /* Typewriter font */
+            font-family: 'Special Elite', monospace;
             color: var(--text-color);
-            overflow: hidden; /* Prevent scrolling, handle inside containers */
+            overflow: hidden;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -66,7 +66,7 @@
             height: 0;
             border-left: 150px solid transparent;
             border-right: 150px solid transparent;
-            border-top: 110px solid var(--envelope-color); /* Lighter flap */
+            border-top: 110px solid var(--envelope-color);
             transform-origin: top;
             transition: transform 0.6s ease-in-out, z-index 0.6s;
             z-index: 20;
@@ -75,7 +75,7 @@
 
         .envelope.open .envelope-flap {
             transform: rotateX(180deg);
-            z-index: 5; /* Moves behind the letter content conceptually */
+            z-index: 5;
         }
 
         .envelope-pocket {
@@ -86,13 +86,12 @@
             height: 0;
             border-left: 150px solid var(--envelope-color);
             border-right: 150px solid var(--envelope-color);
-            border-bottom: 100px solid var(--envelope-dark); /* Slightly darker for depth */
+            border-bottom: 100px solid var(--envelope-dark);
             border-top: 100px solid transparent;
             z-index: 15;
             border-radius: 0 0 5px 5px;
         }
         
-        /* The decorative seal */
         .seal {
             width: 40px;
             height: 40px;
@@ -112,9 +111,7 @@
             border: 2px solid rgba(255,255,255,0.2);
         }
 
-        .envelope.open .seal {
-            display: none;
-        }
+        .envelope.open .seal { display: none; }
 
         /* --- Letter Styling --- */
         .letter-paper {
@@ -143,7 +140,6 @@
             pointer-events: none;
         }
 
-        /* Photo Frame */
         .photo-frame {
             background: white;
             padding: 10px;
@@ -153,7 +149,6 @@
             max-width: 100%;
         }
 
-        /* Hearts Animation */
         .heart-particle {
             position: fixed;
             color: var(--love-red);
@@ -167,7 +162,6 @@
             100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
         }
 
-        /* Button Styling */
         .btn-vintage {
             background-color: var(--love-red);
             color: white;
@@ -181,41 +175,53 @@
             box-shadow: 2px 2px 0px var(--text-color);
             transition: transform 0.1s;
         }
-        .btn-vintage:active {
-            transform: translate(2px, 2px);
-            box-shadow: none;
-        }
+        .btn-vintage:active { transform: translate(2px, 2px); box-shadow: none; }
         
-        /* Specific font for headings */
-        h1, h2 {
-            font-family: 'Special Elite', cursive;
-            color: var(--love-red);
-        }
+        h1, h2 { font-family: 'Special Elite', cursive; color: var(--love-red); }
+        .handwritten { font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: #5d4037; }
 
-        .handwritten {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5rem;
-            color: #5d4037;
-        }
-        
-        /* Contenedor de música oculto (pero no display:none) */
-        #music-container {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* --- VIDEO INVISIBLE PERO "PRESENTE" --- */
+        /* Lo hacemos minúsculo y casi transparente, pero NO display:none */
+        #video-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
             width: 1px;
             height: 1px;
-            opacity: 0.01;
-            z-index: -100;
+            opacity: 0.1; /* Un poco de opacidad para que el navegador sepa que está ahí */
+            z-index: -10;
             pointer-events: none;
-            overflow: hidden;
         }
 
+        /* Botón de rescate de música (por si falla el autoplay) */
+        #music-rescue-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--love-red);
+            color: var(--love-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex; /* Oculto inicialmente */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 20px;
+            display: none; 
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body>
 
-    <div id="music-container"></div>
+    <div id="video-container">
+        <div id="youtube-player"></div>
+    </div>
+
+    <button id="music-rescue-btn" onclick="rescueMusic()" title="Reproducir Música">🎵</button>
 
     <div id="scene-envelope" class="flex flex-col items-center">
         <div class="envelope-container" onclick="openEnvelope()">
@@ -235,7 +241,7 @@
         <h1 class="text-2xl mb-4 font-bold border-b-2 border-red-800 pb-2">9 de Febrero, 2024</h1>
         
         <div class="photo-frame w-full h-48 bg-gray-200 relative overflow-hidden flex items-center justify-center">
-             <img src="file:///C:/Users/valen/OneDrive/Escritorio/Amor/cielo.png" alt="Cielo Estrellado" onerror="this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop'">
+            <img src="cielo.png" alt="Cielo Estrellado" onerror="this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop'">
         </div>
 
         <p class="text-justify text-sm leading-relaxed mb-4">
@@ -317,9 +323,68 @@
     </div>
 
     <script>
-        /* --- Logic --- */
+        /* --- YOUTUBE API LOGIC (ROBUST) --- */
+        var player;
+        var isMusicPlaying = false;
 
-        // 1. Envelope Animation & DIRECT IFRAME INJECTION
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '10', // Altura pequeña pero existente
+                width: '10',  // Ancho pequeño pero existente
+                videoId: 't6jI4kXz5pc',
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 't6jI4kXz5pc'
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log("Player listo. Esperando click.");
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                isMusicPlaying = true;
+                document.getElementById('music-rescue-btn').style.display = 'none'; // Ocultar botón si ya suena
+            }
+        }
+
+        function attemptPlay() {
+            if (player && typeof player.playVideo === 'function') {
+                player.setVolume(100);
+                player.unMute();
+                player.playVideo();
+                
+                // Si después de 2 segundos no suena, mostramos el botón de rescate
+                setTimeout(() => {
+                    if (!isMusicPlaying) {
+                        document.getElementById('music-rescue-btn').style.display = 'flex';
+                    }
+                }, 2000);
+            }
+        }
+
+        function rescueMusic() {
+            if (player && typeof player.playVideo === 'function') {
+                player.playVideo();
+            }
+        }
+
+        /* --- APP LOGIC --- */
+
+        // 1. Envelope Animation & MUSIC TRIGGER
         function openEnvelope() {
             const envelope = document.getElementById('envelope');
             const sceneEnvelope = document.getElementById('scene-envelope');
@@ -328,17 +393,8 @@
                 envelope.classList.add('open');
                 createHearts();
                 
-                // --- MUSICA: INYECCION DIRECTA (FUERZA BRUTA) ---
-                // Esto crea el iframe JUSTO cuando haces click. 
-                // Usamos allow="autoplay" para intentar forzarlo.
-                const musicContainer = document.getElementById('music-container');
-                musicContainer.innerHTML = `
-                    <iframe width="1" height="1" 
-                    src="https://www.youtube.com/embed/t6jI4kXz5pc?autoplay=1&loop=1&playlist=t6jI4kXz5pc" 
-                    title="YouTube video player" frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowfullscreen></iframe>
-                `;
+                // INTENTAR REPRODUCIR LA CANCIÓN
+                attemptPlay();
 
                 // Wait for animation then switch scene
                 setTimeout(() => {
@@ -355,7 +411,7 @@
                 heart.innerHTML = '♥';
                 heart.classList.add('heart-particle');
                 heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '100vh'; // Start from bottom
+                heart.style.top = '100vh';
                 heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
                 document.body.appendChild(heart);
                 setTimeout(() => heart.remove(), 4000);
@@ -391,30 +447,28 @@
             }
             
             update();
-            setInterval(update, 60000); // Update every minute
+            setInterval(update, 60000); 
         }
 
-        // 5. The "No" Button Logic (The Trap)
+        // 5. The "No" Button Logic
         let yesScale = 1;
         function handleNoClick() {
-            yesScale += 0.4; // Grow larger
+            yesScale += 0.4;
             const btnYes = document.getElementById('btn-yes');
             const btnNo = document.getElementById('btn-no');
             
-            // Make Yes bigger
             btnYes.style.transform = `scale(${yesScale})`;
             
-            // Make No smaller or move it randomly? Let's just shrink it until it vanishes
             const currentOpacity = parseFloat(window.getComputedStyle(btnNo).opacity);
             btnNo.style.opacity = currentOpacity - 0.2;
             
             if (currentOpacity <= 0.2) {
-                btnNo.style.display = 'none'; // Gone forever
+                btnNo.style.display = 'none';
             }
         }
 
         function acceptProposal() {
-            createHearts(); // More hearts!
+            createHearts();
             nextScene('scene-proposal', 'scene-success');
         }
 
