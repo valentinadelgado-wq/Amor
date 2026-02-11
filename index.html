@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para mi Pollo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Chosen Palette: Vintage Romance --- */
+        :root {
+            --paper-color: #fdfbf7;
+            --envelope-color: #d7bfa6;
+            --envelope-dark: #c5a98d;
+            --text-color: #4a3b32;
+            --love-red: #d32f2f;
+            --accent-gold: #c5a059;
+        }
+
+        body {
+            background-color: #f0e6d2;
+            font-family: 'Special Elite', monospace; /* Typewriter font */
+            color: var(--text-color);
+            overflow: hidden; /* Prevent scrolling, handle inside containers */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(#d7bfa6 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 1s ease-in forwards; }
+        .slide-up { animation: slideUp 0.8s ease-out forwards; }
+        .pulse { animation: pulse 2s infinite; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* --- Envelope CSS Art --- */
+        .envelope-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .envelope-container:hover { transform: scale(1.02); }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background-color: var(--envelope-dark);
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 110px solid var(--envelope-color); /* Lighter flap */
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out, z-index 0.6s;
+            z-index: 20;
+            border-radius: 5px;
+        }
+
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 5; /* Moves behind the letter content conceptually */
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid var(--envelope-color);
+            border-right: 150px solid var(--envelope-color);
+            border-bottom: 100px solid var(--envelope-dark); /* Slightly darker for depth */
+            border-top: 100px solid transparent;
+            z-index: 15;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        /* The decorative seal */
+        .seal {
+            width: 40px;
+            height: 40px;
+            background-color: var(--love-red);
+            border-radius: 50%;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .envelope.open .seal {
+            display: none;
+        }
+
+        /* --- Letter Styling --- */
+        .letter-paper {
+            background-color: var(--paper-color);
+            width: 90vw;
+            max-width: 500px;
+            min-height: 60vh;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            transform: rotate(-1deg);
+            border: 1px solid #e0e0e0;
+            background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .letter-paper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        /* Photo Frame */
+        .photo-frame {
+            background: white;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: rotate(2deg);
+            margin-bottom: 1.5rem;
+            max-width: 100%;
+        }
+
+        /* Hearts Animation */
+        .heart-particle {
+            position: fixed;
+            color: var(--love-red);
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatUp 3s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Button Styling */
+        .btn-vintage {
+            background-color: var(--love-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 3px;
+            box-shadow: 2px 2px 0px var(--text-color);
+            transition: transform 0.1s;
+        }
+        .btn-vintage:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+        
+        /* Specific font for headings */
+        h1, h2 {
+            font-family: 'Special Elite', cursive;
+            color: var(--love-red);
+        }
+
+        .handwritten {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            color: #5d4037;
+        }
+
+        /* TRUCO PARA EL VIDEO: No usamos display:none, lo hacemos transparente y que no intercepte clicks */
+        #youtube-player {
+            position: absolute;
+            top: -1000px;
+            left: -1000px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -100;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="youtube-player"></div>
+
+    <div id="scene-envelope" class="flex flex-col items-center">
+        <div class="envelope-container" onclick="openEnvelope()">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-pocket"></div>
+                <div class="seal">♥</div>
+                <div class="absolute bottom-4 w-full text-center z-20">
+                    <span class="font-bold text-lg text-white drop-shadow-md" style="font-family: 'Dancing Script', cursive; font-size: 2rem;">Para mi pollo</span>
+                </div>
+            </div>
+        </div>
+        <p class="mt-8 text-gray-500 text-sm animate-pulse">( Haz click para abrir )</p>
+    </div>
+
+    <div id="scene-sky" class="hidden letter-paper fade-in">
+        <h1 class="text-2xl mb-4 font-bold border-b-2 border-red-800 pb-2">9 de Febrero, 2024</h1>
+        
+        <div class="photo-frame w-full h-48 bg-gray-200 relative overflow-hidden flex items-center justify-center">
+             <img src="file:///C:/Users/valen/OneDrive/Escritorio/Amor/cielo.png" alt="Cielo Estrellado">
+        </div>
+
+        <p class="text-justify text-sm leading-relaxed mb-4">
+            Ese día el cielo nos contó una historia. Mientras las estrellas brillaban, algo en el universo conspiraba para nosotros. 
+            <br><br>
+            <span class="italic text-xs text-gray-500">
+                "La astronomía nos enseña humildad, pero tú me enseñaste amor."
+            </span>
+        </p>
+
+        <a href="https://apod.nasa.gov/apod/ap240209.html" target="_blank" class="text-red-700 underline text-xs mb-6 hover:text-red-500">Ver archivo de la NASA</a>
+
+        <div class="mt-auto">
+            <button class="btn-vintage" onclick="nextScene('scene-sky', 'scene-counter')">Siguiente Pág. &rarr;</button>
+        </div>
+    </div>
+
+    <div id="scene-counter" class="hidden letter-paper fade-in">
+        <h1 class="text-xl mb-6 text-red-700 font-bold">Desde el 18 de Junio...</h1>
+        
+        <div class="my-6 p-4 border-2 border-dashed border-red-300 w-full bg-white bg-opacity-50">
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="flex flex-col">
+                    <span id="days" class="text-3xl font-bold text-gray-700">0</span>
+                    <span class="text-xs uppercase tracking-widest">Días</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="hours" class="text-3xl font-bold text-gray-700">0</span>
+                    <span class="text-xs uppercase tracking-widest">Horas</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="minutes" class="text-3xl font-bold text-gray-700">0</span>
+                    <span class="text-xs uppercase tracking-widest">Min</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-lg mb-6 leading-relaxed handwritten">
+            "... declarándonos nuestro amor y, han sido los mejores de mi vida."
+        </p>
+
+        <div class="mt-auto">
+            <button class="btn-vintage" onclick="nextScene('scene-counter', 'scene-proposal')">Quiero hacerte una invitación...</button>
+        </div>
+    </div>
+
+    <div id="scene-proposal" class="hidden letter-paper fade-in relative">
+        <div class="absolute top-0 right-0 p-4 opacity-10">
+            <svg class="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+        </div>
+
+        <h1 class="text-2xl mt-8 mb-8 font-bold text-center leading-normal">
+            Cristian,<br>
+            ¿Quieres ser mi<br>
+            <span class="text-4xl text-red-600 block mt-2" style="font-family: 'Dancing Script'">Valentine's Day?</span>
+        </h1>
+
+        <div class="flex flex-col gap-4 items-center w-full mt-4 h-40 justify-center relative">
+            <button id="btn-yes" class="btn-vintage pulse z-20" onclick="acceptProposal()">
+                ¡SÍ! ♥
+            </button>
+            
+            <button id="btn-no" class="bg-gray-400 text-white px-4 py-2 text-sm rounded font-typewriter hover:bg-gray-500 transition-all z-10" onclick="handleNoClick()" onmouseover="handleNoClick()">
+                No
+            </button>
+        </div>
+    </div>
+
+    <div id="scene-success" class="hidden letter-paper fade-in items-center justify-center text-center">
+        <h1 class="text-3xl font-bold text-red-600 mb-4 animate-bounce">¡Sabía que dirías que sí!</h1>
+        
+        <div class="rounded-full border-4 border-red-200 p-2 mb-6 bg-white shadow-lg overflow-hidden w-48 h-48">
+             <img src="pollitos.gif" alt="Pollitos enamorados" class="w-full h-full object-cover">
+        </div>
+
+        <p class="text-2xl font-bold handwritten text-red-800 mb-2">TE AMO MUCHOO</p>
+        <p class="text-sm text-gray-600">Eres mi mejor regalo.</p>
+        <p class="text-xs text-gray-400 mt-8">- Valentina</p>
+    </div>
+
+    <script>
+        /* --- Logic --- */
+
+        /* --- YOUTUBE API SETUP (FIXED) --- */
+        var player;
+        
+        // 1. Cargamos la API de YouTube asíncronamente
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // 2. Esta función se ejecuta sola cuando la API está lista
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '200', // Altura > 0 para engañar al navegador
+                width: '200',  // Ancho > 0 para engañar al navegador
+                videoId: 't6jI4kXz5pc',
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 0,
+                    'rel': 0,
+                    'showinfo': 0
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // El reproductor está listo, pero NO podemos hacer play aquí todavía
+            // porque el navegador requiere un clic del usuario primero.
+            console.log("YouTube Player listo y esperando click.");
+        }
+
+        // 1. Envelope Animation & MUSIC TRIGGER
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            const sceneEnvelope = document.getElementById('scene-envelope');
+            
+            if (!envelope.classList.contains('open')) {
+                envelope.classList.add('open');
+                createHearts();
+                
+                // INTENTO DE REPRODUCCIÓN AL HACER CLICK
+                // El clic en el sobre cuenta como "interacción de usuario"
+                if (player && typeof player.playVideo === 'function') {
+                    player.setVolume(100); // Asegurar volumen
+                    player.playVideo();
+                } else {
+                    console.log("El reproductor aún no estaba cargado completamente.");
+                }
+
+                // Esperar animación y cambiar escena
+                setTimeout(() => {
+                    sceneEnvelope.classList.add('hidden');
+                    document.getElementById('scene-sky').classList.remove('hidden');
+                }, 1000); 
+            }
+        }
+
+        // 2. Confetti Hearts
+        function createHearts() {
+            for (let i = 0; i < 30; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '♥';
+                heart.classList.add('heart-particle');
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = '100vh';
+                heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }
+        }
+
+        // 3. Scene Navigation
+        function nextScene(currentId, nextId) {
+            document.getElementById(currentId).classList.add('hidden');
+            const nextEl = document.getElementById(nextId);
+            nextEl.classList.remove('hidden');
+            
+            if(nextId === 'scene-counter') {
+                startCounter();
+            }
+        }
+
+        // 4. Time Counter
+        function startCounter() {
+            const startDate = new Date('2024-06-18T00:00:00');
+            
+            function update() {
+                const now = new Date();
+                const diff = now - startDate;
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('days').innerText = days;
+                document.getElementById('hours').innerText = hours;
+                document.getElementById('minutes').innerText = minutes;
+            }
+            
+            update();
+            setInterval(update, 60000); 
+        }
+
+        // 5. The "No" Button Logic
+        let yesScale = 1;
+        function handleNoClick() {
+            yesScale += 0.4;
+            const btnYes = document.getElementById('btn-yes');
+            const btnNo = document.getElementById('btn-no');
+            
+            btnYes.style.transform = `scale(${yesScale})`;
+            
+            const currentOpacity = parseFloat(window.getComputedStyle(btnNo).opacity);
+            btnNo.style.opacity = currentOpacity - 0.2;
+            
+            if (currentOpacity <= 0.2) {
+                btnNo.style.display = 'none';
+            }
+        }
+
+        function acceptProposal() {
+            createHearts();
+            nextScene('scene-proposal', 'scene-success');
+        }
+
+    </script>
+
+</body>
+</html>
