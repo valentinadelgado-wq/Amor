@@ -198,20 +198,13 @@
             color: #5d4037;
         }
 
-        /* TRUCO PARA EL VIDEO: No usamos display:none, lo hacemos transparente y que no intercepte clicks */
-        #youtube-player {
-            position: absolute;
-            top: -1000px;
-            left: -1000px;
-            opacity: 0;
-            pointer-events: none;
-            z-index: -100;
-        }
-
     </style>
 </head>
 <body>
-    <div id="youtube-player"></div>
+
+    <audio id="bg-music" loop>
+        <source src="cancion.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="scene-envelope" class="flex flex-col items-center">
         <div class="envelope-container" onclick="openEnvelope()">
@@ -231,7 +224,7 @@
         <h1 class="text-2xl mb-4 font-bold border-b-2 border-red-800 pb-2">9 de Febrero, 2024</h1>
         
         <div class="photo-frame w-full h-48 bg-gray-200 relative overflow-hidden flex items-center justify-center">
-             <img src="cielo.png" alt="Cielo Estrellado">
+             <img src="file:///C:/Users/valen/OneDrive/Escritorio/Amor/cielo.png" alt="Cielo Estrellado">
         </div>
 
         <p class="text-justify text-sm leading-relaxed mb-4">
@@ -305,7 +298,8 @@
         
         <div class="rounded-full border-4 border-red-200 p-2 mb-6 bg-white shadow-lg overflow-hidden w-48 h-48">
              <img src="pollitos.gif" alt="Pollitos enamorados" class="w-full h-full object-cover">
-        </div>
+
+             </div>
 
         <p class="text-2xl font-bold handwritten text-red-800 mb-2">TE AMO MUCHOO</p>
         <p class="text-sm text-gray-600">Eres mi mejor regalo.</p>
@@ -315,41 +309,11 @@
     <script>
         /* --- Logic --- */
 
-        /* --- YOUTUBE API SETUP (FIXED) --- */
-        var player;
-        
-        // 1. Cargamos la API de YouTube asíncronamente
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        // 2. Esta función se ejecuta sola cuando la API está lista
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-player', {
-                height: '200', // Altura > 0 para engañar al navegador
-                width: '200',  // Ancho > 0 para engañar al navegador
-                videoId: 't6jI4kXz5pc',
-                playerVars: {
-                    'playsinline': 1,
-                    'controls': 0,
-                    'rel': 0,
-                    'showinfo': 0
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            // El reproductor está listo, pero NO podemos hacer play aquí todavía
-            // porque el navegador requiere un clic del usuario primero.
-            console.log("YouTube Player listo y esperando click.");
-        }
-
-        // 1. Envelope Animation & MUSIC TRIGGER
+        // 1. Envelope Animation
         function openEnvelope() {
+            // AQUI ESTA LA ORDEN PARA REPRODUCIR LA CANCION
+            document.getElementById("bg-music").play();
+
             const envelope = document.getElementById('envelope');
             const sceneEnvelope = document.getElementById('scene-envelope');
             
@@ -357,20 +321,11 @@
                 envelope.classList.add('open');
                 createHearts();
                 
-                // INTENTO DE REPRODUCCIÓN AL HACER CLICK
-                // El clic en el sobre cuenta como "interacción de usuario"
-                if (player && typeof player.playVideo === 'function') {
-                    player.setVolume(100); // Asegurar volumen
-                    player.playVideo();
-                } else {
-                    console.log("El reproductor aún no estaba cargado completamente.");
-                }
-
-                // Esperar animación y cambiar escena
+                // Wait for animation then switch scene
                 setTimeout(() => {
                     sceneEnvelope.classList.add('hidden');
                     document.getElementById('scene-sky').classList.remove('hidden');
-                }, 1000); 
+                }, 1000); // 1 second delay
             }
         }
 
@@ -381,9 +336,11 @@
                 heart.innerHTML = '♥';
                 heart.classList.add('heart-particle');
                 heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '100vh';
+                heart.style.top = '100vh'; // Start from bottom
                 heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
                 document.body.appendChild(heart);
+                
+                // Cleanup
                 setTimeout(() => heart.remove(), 4000);
             }
         }
@@ -417,30 +374,33 @@
             }
             
             update();
-            setInterval(update, 60000); 
+            setInterval(update, 60000); // Update every minute
         }
 
-        // 5. The "No" Button Logic
+        // 5. The "No" Button Logic (The Trap)
         let yesScale = 1;
         function handleNoClick() {
-            yesScale += 0.4;
+            yesScale += 0.4; // Grow larger
             const btnYes = document.getElementById('btn-yes');
             const btnNo = document.getElementById('btn-no');
             
+            // Make Yes bigger
             btnYes.style.transform = `scale(${yesScale})`;
             
+            // Make No smaller or move it randomly? Let's just shrink it until it vanishes
             const currentOpacity = parseFloat(window.getComputedStyle(btnNo).opacity);
             btnNo.style.opacity = currentOpacity - 0.2;
             
             if (currentOpacity <= 0.2) {
-                btnNo.style.display = 'none';
+                btnNo.style.display = 'none'; // Gone forever
             }
         }
 
         function acceptProposal() {
-            createHearts();
+            createHearts(); // More hearts!
             nextScene('scene-proposal', 'scene-success');
         }
+
 
     </script>
 
