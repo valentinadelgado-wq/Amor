@@ -224,14 +224,14 @@
         <h1 class="text-2xl mb-4 font-bold border-b-2 border-red-800 pb-2">9 de Febrero, 2024</h1>
         
         <div class="photo-frame w-full h-48 bg-gray-200 relative overflow-hidden flex items-center justify-center">
-             <img src="cielo.png" alt="Cielo Estrellado">
+             <img src="file:///C:/Users/valen/OneDrive/Escritorio/Amor/cielo.png" alt="Cielo Estrellado">
         </div>
 
         <p class="text-justify text-sm leading-relaxed mb-4">
             Ese día el cielo nos contó una historia. Mientras las estrellas brillaban, algo en el universo conspiraba para nosotros. 
             <br><br>
             <span class="italic text-xs text-gray-500">
-                "La astronomía nos enseña humildad, pero tú me enseñaste amor."
+                "Eres un regalo del cielo."
             </span>
         </p>
 
@@ -309,14 +309,27 @@
     <script>
         /* --- Logic --- */
 
-        // 1. Envelope Animation
+        // 1. Envelope Animation & Audio Fade In
         function openEnvelope() {
-            // AQUI ESTA LA ORDEN PARA REPRODUCIR LA CANCION
-            document.getElementById("bg-music").play();
-
             const envelope = document.getElementById('envelope');
             const sceneEnvelope = document.getElementById('scene-envelope');
             
+            // LÓGICA DE AUDIO FADE IN (SUBIR VOLUMEN DE A POCO)
+            const audio = document.getElementById("bg-music");
+            audio.volume = 0; // Empezar en silencio
+            audio.play().then(() => {
+                // Subir volumen gradualmente
+                let volume = 0;
+                const fadeInterval = setInterval(() => {
+                    if (volume < 1.0) {
+                        volume = Math.min(volume + 0.05, 1.0); // Subir de 0.05 en 0.05
+                        audio.volume = volume;
+                    } else {
+                        clearInterval(fadeInterval); // Detener cuando llegue al máximo
+                    }
+                }, 200); // Cada 200 milisegundos sube un poco
+            }).catch(e => console.log("Audio play error:", e));
+
             if (!envelope.classList.contains('open')) {
                 envelope.classList.add('open');
                 createHearts();
@@ -406,4 +419,3 @@
 
 </body>
 </html>
-
