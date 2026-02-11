@@ -24,11 +24,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-image: radial-gradient(#d7bfa6 1px, transparent 1px);
-            background-size: 20px 20px;
         }
 
-        /* --- CLASES DE UTILIDAD --- */
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 1s ease-in forwards; }
         .pulse { animation: pulse 2s infinite; }
@@ -36,102 +33,42 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- PANTALLA DE INICIO (ESTO ARREGLA EL AUDIO) --- */
+        /* --- PANTALLA DE INICIO --- */
         #start-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000;
-            color: white;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; color: white; z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
         }
 
-        /* --- EL SOBRE --- */
-        .envelope-container {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-        .envelope-container:hover { transform: scale(1.02); }
-
-        .envelope {
-            width: 300px; height: 200px;
-            background-color: var(--envelope-dark);
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border-radius: 5px;
-            z-index: 10;
-        }
-
-        .envelope-flap {
-            position: absolute; top: 0; left: 0; width: 0; height: 0;
-            border-left: 150px solid transparent;
-            border-right: 150px solid transparent;
-            border-top: 110px solid var(--envelope-color);
-            transform-origin: top;
-            transition: transform 0.6s ease-in-out, z-index 0.6s;
-            z-index: 20;
-            border-radius: 5px;
-        }
-
-        .envelope.open .envelope-flap { transform: rotateX(180deg); z-index: 5; }
-        .envelope-pocket {
-            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
-            border-left: 150px solid var(--envelope-color);
-            border-right: 150px solid var(--envelope-color);
-            border-bottom: 100px solid var(--envelope-dark);
-            border-top: 100px solid transparent;
-            z-index: 15;
-            border-radius: 0 0 5px 5px;
-        }
-        .seal {
-            width: 40px; height: 40px; background-color: var(--love-red);
-            border-radius: 50%; position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%); z-index: 25;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .envelope.open .seal { display: none; }
-
-        /* --- CARTA --- */
-        .letter-paper {
-            background-color: var(--paper-color);
-            width: 90vw; max-width: 500px; min-height: 60vh;
-            padding: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative; transform: rotate(-1deg);
-            border: 1px solid #e0e0e0;
-            display: flex; flex-direction: column; align-items: center; text-align: center;
-        }
-        .btn-vintage {
-            background-color: var(--love-red); color: white; border: none;
-            padding: 10px 20px; font-family: 'Special Elite', monospace;
-            cursor: pointer; margin-top: 20px; border-radius: 3px;
-            box-shadow: 2px 2px 0px var(--text-color);
-        }
-        
-        .photo-frame {
-            background: white; padding: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transform: rotate(2deg); margin-bottom: 1.5rem; max-width: 100%;
-        }
-
-        /* --- REDUTOR YOUTUBE (Oculto pero funcional) --- */
+        /* --- MINI REPRODUCTOR VISIBLE (PARA QUE NO BLOQUEEN) --- */
         #video-container {
-            position: fixed; top: -200px; left: -200px;
-            width: 50px; height: 50px;
-            opacity: 0.1; z-index: -99; pointer-events: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 120px; /* Pequeño pero visible */
+            height: 70px;
+            z-index: 10000; /* Encima de todo */
+            border: 2px solid white;
+            border-radius: 10px;
+            overflow: hidden;
+            opacity: 0.8;
         }
+
+        /* --- ESTILOS DE CARTA Y SOBRE --- */
+        .envelope-container { cursor: pointer; transition: transform 0.3s; }
+        .envelope-container:hover { transform: scale(1.02); }
+        .envelope { width: 300px; height: 200px; background-color: var(--envelope-dark); position: relative; border-radius: 5px; }
+        .envelope-flap { position: absolute; top: 0; left: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 110px solid var(--envelope-color); transform-origin: top; transition: transform 0.6s ease-in-out, z-index 0.6s; z-index: 20; }
+        .envelope.open .envelope-flap { transform: rotateX(180deg); z-index: 5; }
+        .envelope-pocket { position: absolute; bottom: 0; left: 0; border-left: 150px solid var(--envelope-color); border-right: 150px solid var(--envelope-color); border-bottom: 100px solid var(--envelope-dark); border-top: 100px solid transparent; z-index: 15; border-radius: 0 0 5px 5px; }
         
-        /* Corazones */
-        .heart-particle {
-            position: fixed; color: var(--love-red); font-size: 20px;
-            pointer-events: none; z-index: 100; animation: floatUp 4s ease-out forwards;
-        }
-        @keyframes floatUp { to { transform: translateY(-100vh); opacity: 0; } }
+        .letter-paper { background-color: var(--paper-color); width: 90vw; max-width: 500px; min-height: 60vh; padding: 2rem; position: relative; transform: rotate(-1deg); border: 1px solid #e0e0e0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        
+        .btn-vintage { background-color: var(--love-red); color: white; border: none; padding: 10px 20px; font-family: 'Special Elite', monospace; cursor: pointer; margin-top: 20px; border-radius: 3px; box-shadow: 2px 2px 0px var(--text-color); }
+        
+        /* Loading Text */
+        #loading-text { font-size: 0.8rem; color: #aaa; margin-top: 10px; }
 
     </style>
 </head>
@@ -144,70 +81,58 @@
     <div id="start-screen">
         <h1 class="text-3xl mb-4" style="font-family: 'Dancing Script', cursive;">Hola mi amor...</h1>
         <p class="mb-8">Tengo una sorpresa para ti.<br>Por favor, sube el volumen.</p>
-        <button class="btn-vintage pulse" onclick="startExperience()">
+        
+        <button id="start-btn" class="hidden btn-vintage pulse" onclick="startExperience()">
             COMENZAR ❤️
         </button>
+        
+        <p id="loading-text" class="animate-pulse">Cargando canción...</p>
     </div>
 
-    <div id="scene-envelope" class="hidden flex flex-col items-center">
-        <div class="envelope-container" onclick="openEnvelope()">
-            <div class="envelope" id="envelope">
-                <div class="envelope-flap"></div>
-                <div class="envelope-pocket"></div>
-                <div class="seal">♥</div>
-                <div class="absolute bottom-4 w-full text-center z-20">
-                    <span class="font-bold text-lg text-white drop-shadow-md" style="font-family: 'Dancing Script', cursive; font-size: 2rem;">Para mi pollo</span>
+    <div id="main-content" class="hidden w-full flex justify-center">
+        
+        <div id="scene-envelope" class="flex flex-col items-center">
+            <div class="envelope-container" onclick="openEnvelope()">
+                <div class="envelope" id="envelope">
+                    <div class="envelope-flap"></div>
+                    <div class="envelope-pocket"></div>
+                    <div class="absolute bottom-4 w-full text-center z-20">
+                        <span class="font-bold text-lg text-white drop-shadow-md" style="font-family: 'Dancing Script', cursive; font-size: 2rem;">Para mi pollo</span>
+                    </div>
                 </div>
             </div>
+            <p class="mt-8 text-gray-500 text-sm animate-pulse">( Haz click para abrir )</p>
         </div>
-        <p class="mt-8 text-gray-500 text-sm animate-pulse">( Haz click para abrir )</p>
-    </div>
 
-    <div id="scene-sky" class="hidden letter-paper fade-in">
-        <h1 class="text-2xl mb-4 font-bold text-red-700">9 de Febrero, 2024</h1>
-        <div class="photo-frame w-full h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
-            <img src="cielo.png" alt="Cielo" onerror="this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop'">
+        <div id="scene-sky" class="hidden letter-paper fade-in">
+            <h1 class="text-2xl mb-4 font-bold text-red-700">9 de Febrero, 2024</h1>
+            <div class="w-full h-48 bg-gray-200 mb-4 overflow-hidden flex items-center justify-center">
+                <img src="cielo.png" alt="Cielo" class="object-cover w-full h-full" onerror="this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800'">
+            </div>
+            <p class="text-sm mb-4">Ese día el cielo nos contó una historia...</p>
+            <button class="btn-vintage" onclick="nextScene('scene-sky', 'scene-proposal')">Siguiente &rarr;</button>
         </div>
-        <p class="text-sm mb-4">Ese día el cielo nos contó una historia. Las estrellas conspiraron para nosotros.</p>
-        <button class="btn-vintage" onclick="nextScene('scene-sky', 'scene-counter')">Siguiente &rarr;</button>
-    </div>
 
-    <div id="scene-counter" class="hidden letter-paper fade-in">
-        <h1 class="text-xl mb-6 text-red-700 font-bold">Desde el 18 de Junio...</h1>
-        <div class="my-6 p-4 border-2 border-dashed border-red-300 w-full">
-            <div class="grid grid-cols-3 gap-2 text-center text-xl font-bold text-gray-700">
-                <div><span id="days">0</span><br><span class="text-xs font-normal">Días</span></div>
-                <div><span id="hours">0</span><br><span class="text-xs font-normal">Horas</span></div>
-                <div><span id="minutes">0</span><br><span class="text-xs font-normal">Min</span></div>
+        <div id="scene-proposal" class="hidden letter-paper fade-in">
+            <h1 class="text-2xl mt-8 mb-8 font-bold text-center">
+                ¿Quieres ser mi<br>
+                <span class="text-4xl text-red-600" style="font-family: 'Dancing Script'">Valentine's Day?</span>
+            </h1>
+            <div class="flex gap-4 mt-4 justify-center">
+                <button id="btn-yes" class="btn-vintage pulse" onclick="acceptProposal()">¡SÍ! ♥</button>
             </div>
         </div>
-        <button class="btn-vintage" onclick="nextScene('scene-counter', 'scene-proposal')">Tengo una pregunta...</button>
-    </div>
-
-    <div id="scene-proposal" class="hidden letter-paper fade-in">
-        <h1 class="text-2xl mt-8 mb-8 font-bold text-center">
-            Cristian,<br>¿Quieres ser mi<br>
-            <span class="text-4xl text-red-600" style="font-family: 'Dancing Script'">Valentine's Day?</span>
-        </h1>
-        <div class="flex gap-4 mt-4 h-40 items-center justify-center">
-            <button id="btn-yes" class="btn-vintage pulse" onclick="acceptProposal()">¡SÍ! ♥</button>
-            <button id="btn-no" class="bg-gray-400 text-white px-4 py-2 rounded" onclick="handleNoClick()" onmouseover="handleNoClick()">No</button>
+        
+        <div id="scene-success" class="hidden letter-paper fade-in items-center justify-center text-center">
+            <h1 class="text-3xl font-bold text-red-600 mb-4">¡TE AMO!</h1>
+             <img src="pollitos.gif" alt="Amor" class="w-48 h-48 object-cover rounded-full mb-4">
         </div>
-    </div>
 
-    <div id="scene-success" class="hidden letter-paper fade-in items-center justify-center text-center">
-        <h1 class="text-3xl font-bold text-red-600 mb-4 animate-bounce">¡SABÍA QUE SÍ!</h1>
-        <div class="rounded-full border-4 border-red-200 p-2 mb-6 bg-white shadow-lg w-48 h-48 overflow-hidden">
-             <img src="pollitos.gif" alt="Amor" class="w-full h-full object-cover">
-        </div>
-        <p class="text-2xl font-bold text-red-800">TE AMO MUCHOO</p>
     </div>
 
     <script>
-        // --- LOGICA DEL REPRODUCTOR DE YOUTUBE ---
+        // --- YOUTUBE API ---
         var player;
-        
-        // Cargar API
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -215,92 +140,70 @@
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
-                height: '50', 
-                width: '50',
-                videoId: 't6jI4kXz5pc', // ID de tu video
+                height: '100%',
+                width: '100%',
+                videoId: 't6jI4kXz5pc', // ID DE LA CANCIÓN
                 playerVars: {
                     'playsinline': 1,
-                    'controls': 0,
-                    'loop': 1,
-                    'playlist': 't6jI4kXz5pc' // Necesario para loop
+                    'controls': 1, // Controles visibles por si acaso falla el auto
+                    'loop': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onError': onPlayerError
                 }
             });
         }
 
-        // --- FUNCION DE ARRANQUE (CLAVE) ---
+        // CUANDO LA MUSICA ESTA LISTA
+        function onPlayerReady(event) {
+            console.log("Música cargada");
+            document.getElementById('loading-text').classList.add('hidden');
+            document.getElementById('start-btn').classList.remove('hidden');
+        }
+
+        // SI HAY ERROR (COPYRIGHT O ID MAL)
+        function onPlayerError(event) {
+            console.error("Error en YouTube:", event.data);
+            document.getElementById('loading-text').innerText = "Error cargando música :( Intenta recargar.";
+            document.getElementById('loading-text').style.color = "red";
+        }
+
+        // AL DAR CLICK EN COMENZAR
         function startExperience() {
-            // 1. Intentar reproducir audio
-            if (player && typeof player.playVideo === 'function') {
+            // Intentar reproducir
+            if (player) {
+                player.unMute(); // Quitar silencio importante para Chrome
                 player.setVolume(100);
                 player.playVideo();
-            } else {
-                console.log("Player no listo, reintentando en breve...");
-                // Reintento de emergencia
-                setTimeout(() => { if(player) player.playVideo(); }, 1000);
             }
 
-            // 2. Ocultar pantalla negra y mostrar sobre
+            // Ocultar inicio, mostrar contenido
             document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('scene-envelope').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            
+            // Ocultar el video visualmente (opcional, si quieres que desaparezca de la esquina)
+            // document.getElementById('video-container').style.opacity = '0'; 
         }
 
-        // --- LÓGICA DE LA PÁGINA ---
+        // --- NAVEGACION ---
         function openEnvelope() {
-            const envelope = document.getElementById('envelope');
-            if (!envelope.classList.contains('open')) {
-                envelope.classList.add('open');
-                createHearts();
-                setTimeout(() => {
-                    document.getElementById('scene-envelope').classList.add('hidden');
-                    document.getElementById('scene-sky').classList.remove('hidden');
-                }, 1000);
-            }
+            document.getElementById('envelope').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('scene-envelope').classList.add('hidden');
+                document.getElementById('scene-sky').classList.remove('hidden');
+            }, 1000);
         }
 
-        function createHearts() {
-            for (let i = 0; i < 20; i++) {
-                const heart = document.createElement('div');
-                heart.innerHTML = '♥';
-                heart.classList.add('heart-particle');
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '100vh';
-                heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 4000);
-            }
-        }
-
-        function nextScene(current, next) {
-            document.getElementById(current).classList.add('hidden');
+        function nextScene(curr, next) {
+            document.getElementById(curr).classList.add('hidden');
             document.getElementById(next).classList.remove('hidden');
-            if(next === 'scene-counter') startCounter();
-        }
-
-        function startCounter() {
-            const startDate = new Date('2024-06-18T00:00:00');
-            function update() {
-                const now = new Date();
-                const diff = now - startDate;
-                document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-                document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                document.getElementById('minutes').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            }
-            update(); setInterval(update, 60000);
-        }
-
-        let yesScale = 1;
-        function handleNoClick() {
-            yesScale += 0.3;
-            document.getElementById('btn-yes').style.transform = `scale(${yesScale})`;
-            const btnNo = document.getElementById('btn-no');
-            btnNo.style.opacity = parseFloat(window.getComputedStyle(btnNo).opacity) - 0.2;
-            if (btnNo.style.opacity < 0.2) btnNo.style.display = 'none';
         }
 
         function acceptProposal() {
-            createHearts();
             nextScene('scene-proposal', 'scene-success');
         }
+
     </script>
 </body>
 </html>
